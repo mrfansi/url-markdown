@@ -1,16 +1,8 @@
-import time
-from bs4 import BeautifulSoup
-import html2text
 import re
-from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
-                              QPushButton, QTextEdit, QLineEdit, QLabel, QMessageBox,
-                              QFileDialog)
-from PySide6.QtCore import Signal, QObject
+from PySide6.QtWidgets import (QApplication)
 import sys
 import asyncio
-from pyppeteer import launch
-import qasync
-from qasync import asyncSlot, QEventLoop
+from qasync import QEventLoop
 from src.services.web_scraper import WebScraper
 from src.services.html_converter import HTMLConverter
 from src.services.file_storage import FileStorage
