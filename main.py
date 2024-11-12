@@ -11,6 +11,10 @@ import asyncio
 from pyppeteer import launch
 import qasync
 from qasync import asyncSlot, QEventLoop
+from src.services.web_scraper import WebScraper
+from src.services.html_converter import HTMLConverter
+from src.services.file_storage import FileStorage
+from src.ui.main_window import MarkdownViewer
 
 def slugify(text):
     """
@@ -116,115 +120,18 @@ async def url_to_markdown(url):
         print(error_msg)
         return None, None
 
-class MarkdownViewer(QMainWindow):
-    def __init__(self):
-        super().__init__()
-        self.setWindowTitle("URL to Markdown Converter")
-        self.setMinimumSize(800, 600)
-        
-        # Create central widget and layout
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        layout = QVBoxLayout(central_widget)
-
-        # URL input
-        url_layout = QVBoxLayout()
-        url_label = QLabel("Enter URL:")
-        self.url_input = QLineEdit()
-        self.url_input.setPlaceholderText("https://example.com")
-        self.convert_button = QPushButton("Convert to Markdown")
-        self.convert_button.setMinimumHeight(40)
-        self.convert_button.clicked.connect(self.convert_url)
-        
-        url_layout.addWidget(url_label)
-        url_layout.addWidget(self.url_input)
-        url_layout.addWidget(self.convert_button)
-        layout.addLayout(url_layout)
-
-        # Markdown display
-        self.text_area = QTextEdit()
-        self.text_area.setReadOnly(True)
-        layout.addWidget(self.text_area)
-
-        # Button layout
-        button_layout = QVBoxLayout()
-        
-        # Copy button
-        self.copy_button = QPushButton("Copy to Clipboard")
-        self.copy_button.clicked.connect(self.copy_to_clipboard)
-        self.copy_button.setMinimumHeight(40)
-        button_layout.addWidget(self.copy_button)
-        
-        # Save button
-        self.save_button = QPushButton("Save Markdown")
-        self.save_button.clicked.connect(self.save_markdown)
-        self.save_button.setEnabled(False)  # Initially disabled
-        self.save_button.setMinimumHeight(40)
-        button_layout.addWidget(self.save_button)
-        
-        layout.addLayout(button_layout)
-        
-        # Store current markdown and title
-        self.current_markdown = None
-        self.current_title = None
-
-        # Status bar
-        self.statusBar().showMessage("Ready")
-
-    @asyncSlot()
-    async def convert_url(self):
-        if not self.url_input.text():
-            return
-            
-        # Disable input while processing
-        self.url_input.setEnabled(False)
-        self.convert_button.setEnabled(False)
-        self.statusBar().showMessage("Converting...")
-        
-        try:
-            result, title = await url_to_markdown(self.url_input.text())
-            if result:
-                self.current_markdown = result
-                self.current_title = title
-                self.text_area.setText(result)
-                self.save_button.setEnabled(True)
-            else:
-                QMessageBox.warning(self, "Error", "Conversion failed")
-        except Exception as e:
-            QMessageBox.warning(self, "Error", f"Conversion failed: {str(e)}")
-        finally:
-            self.statusBar().clearMessage()
-            self.url_input.setEnabled(True)
-            self.convert_button.setEnabled(True)
-
-    def copy_to_clipboard(self):
-        clipboard = QApplication.clipboard()
-        clipboard.setText(self.text_area.toPlainText())
-        
-    def save_markdown(self):
-        if self.current_markdown and self.current_title:
-            try:
-                # Open file dialog to choose save location
-                file_path, _ = QFileDialog.getSaveFileName(
-                    self,
-                    "Save Markdown File",
-                    f"{self.current_title}.md",
-                    "Markdown Files (*.md);;All Files (*)"
-                )
-                
-                if file_path:  # Only save if user didn't cancel
-                    with open(file_path, 'w', encoding='utf-8') as file:
-                        file.write(self.current_markdown)
-                    self.statusBar().showMessage(f"Saved to {file_path}")
-            except Exception as e:
-                QMessageBox.warning(self, "Error", f"Failed to save file: {e}")
-
 def main():
     app = QApplication(sys.argv)
     loop = QEventLoop(app)
     asyncio.set_event_loop(loop)
     
-    viewer = MarkdownViewer()
+    # Initialize services
+    scraper = WebScraper()
+    converter = HTMLConverter()
+    storage = FileStorage()
+    
+    # Create and show main window
+    viewer = MarkdownViewer(scraper, converter, storage)
     viewer.show()
     
     with loop:
