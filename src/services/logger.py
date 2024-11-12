@@ -3,6 +3,7 @@ from typing import Optional, Protocol
 import threading
 import queue
 import datetime
+import os
 from abc import ABC, abstractmethod
 
 class LogObserver(Protocol):
@@ -28,8 +29,13 @@ class LoggerService:
         logger = logging.getLogger('URLMarkdown')
         logger.setLevel(logging.DEBUG)
 
+        # Ensure logs directory exists
+        logs_dir = 'logs'
+        if not os.path.exists(logs_dir):
+            os.makedirs(logs_dir)
+
         # File handler
-        file_handler = logging.FileHandler('url_markdown.log')
+        file_handler = logging.FileHandler(os.path.join(logs_dir, 'url_markdown.log'))
         file_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
         file_handler.setFormatter(file_formatter)
         logger.addHandler(file_handler)
