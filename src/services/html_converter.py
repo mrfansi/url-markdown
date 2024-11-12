@@ -1,6 +1,7 @@
 import html2text
 from bs4 import BeautifulSoup
 from ..interfaces.converter import IConverter
+from ..config import CONTENT_SELECTORS, CLEANING_SELECTORS
 import threading
 
 class HTMLConverter(IConverter):
@@ -21,36 +22,32 @@ class HTMLConverter(IConverter):
         return self.converter.handle(str(main_content))
     
     def _clean_content(self, soup: BeautifulSoup) -> None:
-        unwanted_tags = ['nav', 'footer', 'header', 'breadcrumb', 'aside']
-        common_classes = [
-            'navigation', 'nav', 'footer', 'menu', 'sidebar', 'breadcrumb',
-            'author', 'bio', 'profile', 'social', 'share', 'sharing', 'social-media',
-            'social-links', 'author-info', 'about-author', 'twitter', 'facebook',
-            'linkedin', 'social-buttons', 'author-bio', 'author-box', 'author-details',
-            'related-posts', 'post-block-list', 'post-block', 'post-blocks', 'post-blocks-list',
-            'header-social-networks', 'header-social', 'header-social-links', 'header-social-icons',
-            'entry-meta', 'single-more-articles'
-        ]
-        common_ids = [
-            'author', 'social', 'share', 'profile', 'bio',
-            'author-box', 'social-media', 'sharing-buttons'
-        ]
-        
         # Remove unwanted elements
-        for tag in unwanted_tags:
+        for tag in CLEANING_SELECTORS['unwanted_tags']:
             for element in soup.find_all(tag):
                 element.decompose()
                 
         # Remove elements by class names
-        for class_name in common_classes:
+        for class_name in CLEANING_SELECTORS['common_classes']:
             for element in soup.find_all(class_=lambda x: x and class_name in x.lower()):
                 element.decompose()
                 
         # Remove elements by IDs
-        for id_name in common_ids:
+        for id_name in CLEANING_SELECTORS['common_ids']:
             for element in soup.find_all(id=lambda x: x and id_name in x.lower()):
                 element.decompose()
     
     def _extract_main_content(self, soup: BeautifulSoup) -> str:
-        return soup.find('main') or soup.find('article') or \
-               soup.find('div', class_='content') or soup.find('body')
+        # Try to find element with matching ID
+        for content_id in CONTENT_SELECTORS['ids']:
+            main_content = soup.find(id=lambda x: x and content_id in x.lower())
+            if main_content:
+                return main_content
+                
+        # Try to find element with matching class
+        for content_class in CONTENT_SELECTORS['classes']:
+            main_content = soup.find(class_=content_class)
+            if main_content:
+                return main_content
+                
+        return soup.find('body')  # Fallback to body if no content is found
