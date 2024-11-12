@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QFileDialog, QMessageBox, QApplication
+from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QFileDialog, QMessageBox, QApplication, QDockWidget
+from PySide6.QtCore import Qt
 from qasync import asyncSlot
 
 from ..interfaces.converter import IConverter
@@ -7,6 +8,8 @@ from ..interfaces.storage import IStorage
 from .widgets.url_input import URLInputWidget
 from .widgets.markdown_display import MarkdownDisplayWidget
 from .widgets.action_buttons import ActionButtonsWidget
+from .widgets.logger_widget import LogWidget
+from ..services.logger import LoggerService
 
 
 class MarkdownViewer(QMainWindow):
@@ -22,6 +25,7 @@ class MarkdownViewer(QMainWindow):
         self.setMinimumSize(800, 600)
         
         self._init_ui()
+        self._setup_log_widget()
         
     def _init_ui(self):
         central_widget = QWidget()
@@ -42,6 +46,16 @@ class MarkdownViewer(QMainWindow):
         layout.addWidget(self.action_buttons)
         
         self.statusBar().showMessage("Ready")
+
+    def _setup_log_widget(self):
+        log_widget = LogWidget()
+        dock = QDockWidget("Logs", self)
+        dock.setWidget(log_widget)
+        self.addDockWidget(Qt.BottomDockWidgetArea, dock)
+        
+        # Register widget as log observer
+        logger = LoggerService()
+        logger.add_observer(log_widget)
 
     @asyncSlot()
     async def convert_url(self):
