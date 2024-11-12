@@ -1,5 +1,4 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton, QLabel
-from PySide6.QtCore import Qt
 
 class URLInputWidget(QWidget):
     """

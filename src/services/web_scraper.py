@@ -1,7 +1,6 @@
 from pyppeteer import launch
 from ..interfaces.scraper import IScraper
 from typing import Tuple
-import asyncio
 
 class WebScraper(IScraper):
     async def fetch_content(self, url: str) -> Tuple[str, str]:
