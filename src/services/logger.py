@@ -1,5 +1,5 @@
 import logging
-from typing import Optional, Protocol
+from typing import Protocol
 import threading
 import queue
 import datetime
