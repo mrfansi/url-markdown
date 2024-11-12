@@ -1,4 +1,8 @@
-from PySide6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QFileDialog, QMessageBox, QApplication, QDockWidget
+from typing import Optional
+from PySide6.QtWidgets import (
+    QMainWindow, QWidget, QVBoxLayout, QFileDialog,
+    QMessageBox, QApplication
+)
 from PySide6.QtCore import Qt
 from qasync import asyncSlot
 
@@ -15,16 +19,21 @@ from ..services.logger import LoggerService
 class MarkdownViewer(QMainWindow):
     """Main window for the URL to Markdown converter application."""
 
-    def __init__(self, scraper: IScraper, converter: IConverter, storage: IStorage) -> None:
-        super().__init__()
+    def __init__(self, 
+                 scraper: IScraper, 
+                 converter: IConverter, 
+                 storage: IStorage,
+                 parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self._setup_components(scraper, converter, storage)
+        self._init_ui()
+        
+    def _setup_components(self, scraper: IScraper, converter: IConverter, storage: IStorage) -> None:
         self.scraper = scraper
         self.converter = converter
         self.storage = storage
-        
         self.setWindowTitle("URL to Markdown Converter")
         self.setMinimumSize(800, 600)
-        
-        self._init_ui()
         
     def _init_ui(self):
         central_widget = QWidget()
@@ -58,35 +67,43 @@ class MarkdownViewer(QMainWindow):
         self.statusBar().showMessage("Ready")
 
     @asyncSlot()
-    async def convert_url(self):
-        url = self.url_widget.get_url()
-        if not url:
+    async def convert_url(self) -> None:
+        """Convert URL to markdown asynchronously."""
+        if not (url := self.url_widget.get_url()):
             return
             
-        self.url_widget.set_enabled(False)
-        self.action_buttons.setEnabled(False)
-        QApplication.processEvents()  # Process any pending events
-        
+        self._set_ui_state(False)
         try:
-            self.statusBar().showMessage("Downloading page...")
-            QApplication.processEvents()  # Keep UI responsive
-            content, title = await self.scraper.fetch_content(url)
-            
-            self.statusBar().showMessage("Converting to markdown...")
-            QApplication.processEvents()  # Keep UI responsive
-            markdown = self.converter.convert_to_markdown(content)
-            
-            self.statusBar().showMessage("Updating display...")
-            QApplication.processEvents()  # Keep UI responsive
-            self.markdown_widget.set_content(markdown, title)
-            
-            self.action_buttons.enable_save()
-            self.statusBar().showMessage("Conversion complete", 2000)
+            await self._perform_conversion(url)
         except Exception as e:
             self._show_error(f"Conversion failed: {str(e)}")
         finally:
-            self.url_widget.set_enabled(True)
-            self.action_buttons.setEnabled(True)
+            self._set_ui_state(True)
+
+    async def _perform_conversion(self, url: str) -> None:
+        """Perform the actual conversion process."""
+        self._update_status("Downloading page...")
+        content, title = await self.scraper.fetch_content(url)
+        
+        self._update_status("Converting to markdown...")
+        markdown = self.converter.convert_to_markdown(content)
+        
+        self._update_status("Updating display...")
+        self.markdown_widget.set_content(markdown, title)
+        
+        self.action_buttons.enable_save()
+        self._update_status("Conversion complete", timeout=2000)
+
+    def _set_ui_state(self, enabled: bool) -> None:
+        """Enable or disable UI elements."""
+        self.url_widget.set_enabled(enabled)
+        self.action_buttons.setEnabled(enabled)
+        QApplication.processEvents()
+
+    def _update_status(self, message: str, timeout: int = 0) -> None:
+        """Update status bar with message."""
+        self.statusBar().showMessage(message, timeout)
+        QApplication.processEvents()
 
     def save_markdown(self):
         content = self.markdown_widget.get_content()

@@ -1,34 +1,29 @@
 CONTENT_SELECTORS = {
     'ids': [
+        'content',
         'main-content',
-        'article-content',
-        'post-content',
-        'content'
+        'article-content'
     ],
     'classes': [
-        'single-content',
-        'article-content',
-        'post-content',
-        'entry-content',
-        'main-content'
+        'rm-Article',  # Add readme.com article class
+        'content-body', 
+        'article',
+        'post-content'
     ]
 }
 
 CLEANING_SELECTORS = {
     'unwanted_tags': [
-        'nav', 'footer', 'header', 'breadcrumb', 'aside'
+        'script', 'style', 'iframe', 'button'
     ],
     'common_classes': [
-        'navigation', 'nav', 'footer', 'menu', 'sidebar', 'breadcrumb',
-        'author', 'bio', 'profile', 'social', 'share', 'sharing', 'social-media',
-        'social-links', 'author-info', 'about-author', 'twitter', 'facebook',
-        'linkedin', 'social-buttons', 'author-bio', 'author-box', 'author-details',
-        'related-posts', 'post-block-list', 'post-block', 'post-blocks', 'post-blocks-list',
-        'header-social-networks', 'header-social', 'header-social-links', 'header-social-icons',
-        'entry-meta', 'single-more-articles'
+        'rdmd-code-copy',  # Remove copy code buttons
+        'CodeTabs-toolbar', # Remove code tab buttons
+        'heading-anchor-icon', # Remove anchor icons
+        'PageThumbs', # Remove feedback section
+        'UpdatedAt'  # Remove update timestamp
     ],
     'common_ids': [
-        'author', 'social', 'share', 'profile', 'bio',
-        'author-box', 'social-media', 'sharing-buttons'
+        'tutorialmodal-root'
     ]
 }

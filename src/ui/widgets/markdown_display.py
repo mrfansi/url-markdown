@@ -1,32 +1,32 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLabel
+from typing import Optional
 
 class MarkdownDisplayWidget(QWidget):
-    """
-    A widget for displaying and formatting markdown content.
-    
-    This widget provides a read-only text area with markdown syntax highlighting
-    and formatted preview capabilities.
-    
-    Attributes:
-        title (str): The title of the current markdown content
-        text_edit (QTextEdit): The main text display area
-    """
+    """Widget for displaying and formatting markdown content."""
 
-    def __init__(self) -> None:
-        """Initialize the markdown display widget."""
-        super().__init__()
-        self.title = ""
+    def __init__(self, parent: Optional[QWidget] = None) -> None:
+        super().__init__(parent)
+        self.title: str = ""
         self._init_ui()
 
     def _init_ui(self) -> None:
-        """Initialize the user interface components."""
         layout = QVBoxLayout(self)
+        layout.setContentsMargins(10, 10, 10, 10)
         
-        markdown_label = QLabel("Markdown Preview:")
+        self._setup_header()
+        self._setup_editor()
+        
+    def _setup_header(self) -> None:
+        self.header_label = QLabel("Markdown Preview:")
+        self.layout().addWidget(self.header_label)
+        
+    def _setup_editor(self) -> None:
         self.text_edit = QTextEdit()
         self.text_edit.setReadOnly(True)
+        self._apply_editor_style()
+        self.layout().addWidget(self.text_edit)
         
-        # Add custom styling
+    def _apply_editor_style(self) -> None:
         self.text_edit.setStyleSheet("""
             QTextEdit {
                 border: none;
@@ -35,9 +35,6 @@ class MarkdownDisplayWidget(QWidget):
                 line-height: 1.5;
             }
         """)
-        
-        layout.addWidget(markdown_label)
-        layout.addWidget(self.text_edit)
 
     def set_content(self, content: str, title: str) -> None:
         """
