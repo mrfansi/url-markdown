@@ -2,14 +2,26 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLabel
 from .markdown_highlighter import MarkdownHighlighter
 
 class MarkdownDisplayWidget(QWidget):
-    """Widget for displaying converted markdown content."""
+    """
+    A widget for displaying and formatting markdown content.
+    
+    This widget provides a read-only text area with markdown syntax highlighting
+    and formatted preview capabilities.
+    
+    Attributes:
+        title (str): The title of the current markdown content
+        text_edit (QTextEdit): The main text display area
+        highlighter (MarkdownHighlighter): Syntax highlighter for markdown
+    """
 
     def __init__(self) -> None:
+        """Initialize the markdown display widget."""
         super().__init__()
         self.title = ""
         self._init_ui()
 
     def _init_ui(self) -> None:
+        """Initialize the user interface components."""
         layout = QVBoxLayout(self)
         
         markdown_label = QLabel("Markdown Preview:")
@@ -33,11 +45,30 @@ class MarkdownDisplayWidget(QWidget):
         layout.addWidget(self.text_edit)
 
     def set_content(self, content: str, title: str) -> None:
+        """
+        Set the markdown content and title.
+        
+        Args:
+            content (str): The markdown content to display
+            title (str): The title of the content
+        """
         self.title = title
         self.text_edit.setText(content)
 
     def get_content(self) -> str:
+        """
+        Get the current markdown content.
+        
+        Returns:
+            str: The current markdown text
+        """
         return self.text_edit.toPlainText()
 
     def get_title(self) -> str:
+        """
+        Get the current content title.
+        
+        Returns:
+            str: The current title
+        """
         return self.title

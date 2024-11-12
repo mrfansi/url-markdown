@@ -2,14 +2,30 @@ from PySide6.QtWidgets import QWidget, QVBoxLayout, QLineEdit, QPushButton, QLab
 from PySide6.QtCore import Qt
 
 class URLInputWidget(QWidget):
-    """Widget for URL input and conversion trigger."""
+    """
+    A widget for URL input and conversion triggering.
+    
+    This widget provides a URL input field and a convert button,
+    with support for Enter key submission.
+    
+    Attributes:
+        url_input (QLineEdit): The URL input field
+        convert_button (QPushButton): The conversion trigger button
+    """
 
     def __init__(self, on_convert: callable) -> None:
+        """
+        Initialize the URL input widget.
+        
+        Args:
+            on_convert (callable): Callback function for conversion trigger
+        """
         super().__init__()
         self.on_convert = on_convert
         self._init_ui()
 
     def _init_ui(self) -> None:
+        """Initialize the user interface components."""
         layout = QVBoxLayout(self)
         layout.setSpacing(8)  # Add spacing between widgets
         
@@ -35,14 +51,21 @@ class URLInputWidget(QWidget):
         layout.addWidget(self.convert_button)
 
     def get_url(self) -> str:
+        """
+        Get the current URL from the input field.
+        
+        Returns:
+            str: The trimmed URL text
+        """
         return self.url_input.text().strip()
 
     def set_enabled(self, enabled: bool) -> None:
+        """
+        Enable or disable the input components.
+        
+        Args:
+            enabled (bool): True to enable, False to disable
+        """
         self.url_input.setEnabled(enabled)
         self.convert_button.setEnabled(enabled)
-        
-        # Update button text to show loading state
-        if enabled:
-            self.convert_button.setText("Convert")
-        else:
-            self.convert_button.setText("Converting...")
+        self.convert_button.setText("Convert" if enabled else "Converting...")
