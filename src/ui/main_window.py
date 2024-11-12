@@ -25,12 +25,19 @@ class MarkdownViewer(QMainWindow):
         self.setMinimumSize(800, 600)
         
         self._init_ui()
-        self._setup_log_widget()
         
     def _init_ui(self):
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
         layout = QVBoxLayout(central_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
+        
+        # Create main content area
+        content_widget = QWidget()
+        content_layout = QVBoxLayout(content_widget)
+        content_layout.setContentsMargins(0, 0, 0, 0)
+        content_layout.setSpacing(0)
         
         # Create widgets
         self.url_widget = URLInputWidget(self.convert_url)
@@ -39,23 +46,16 @@ class MarkdownViewer(QMainWindow):
             self.copy_to_clipboard,
             self.save_markdown
         )
+        self.log_widget = LogWidget()
         
-        # Add widgets to layout
-        layout.addWidget(self.url_widget)
-        layout.addWidget(self.markdown_widget)
-        layout.addWidget(self.action_buttons)
+        # Add widgets to content layout
+        content_layout.addWidget(self.url_widget)
+        content_layout.addWidget(self.markdown_widget)
+        content_layout.addWidget(self.action_buttons)
+        content_layout.addWidget(self.log_widget)
         
+        layout.addWidget(content_widget)
         self.statusBar().showMessage("Ready")
-
-    def _setup_log_widget(self):
-        log_widget = LogWidget()
-        dock = QDockWidget("Logs", self)
-        dock.setWidget(log_widget)
-        self.addDockWidget(Qt.BottomDockWidgetArea, dock)
-        
-        # Register widget as log observer
-        logger = LoggerService()
-        logger.add_observer(log_widget)
 
     @asyncSlot()
     async def convert_url(self):
@@ -64,23 +64,29 @@ class MarkdownViewer(QMainWindow):
             return
             
         self.url_widget.set_enabled(False)
-        self.statusBar().showMessage("Fetching content...")
+        self.action_buttons.setEnabled(False)
+        QApplication.processEvents()  # Process any pending events
         
         try:
-            # Show intermediate status updates
             self.statusBar().showMessage("Downloading page...")
+            QApplication.processEvents()  # Keep UI responsive
             content, title = await self.scraper.fetch_content(url)
             
             self.statusBar().showMessage("Converting to markdown...")
+            QApplication.processEvents()  # Keep UI responsive
             markdown = self.converter.convert_to_markdown(content)
             
+            self.statusBar().showMessage("Updating display...")
+            QApplication.processEvents()  # Keep UI responsive
             self.markdown_widget.set_content(markdown, title)
+            
             self.action_buttons.enable_save()
             self.statusBar().showMessage("Conversion complete", 2000)
         except Exception as e:
             self._show_error(f"Conversion failed: {str(e)}")
         finally:
             self.url_widget.set_enabled(True)
+            self.action_buttons.setEnabled(True)
 
     def save_markdown(self):
         content = self.markdown_widget.get_content()

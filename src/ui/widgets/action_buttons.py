@@ -1,4 +1,5 @@
-from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton
+from PySide6.QtWidgets import QWidget, QHBoxLayout, QPushButton  # Removed QStyle
+from PySide6.QtCore import Qt  # Removed QIcon import
 
 class ActionButtonsWidget(QWidget):
     """
