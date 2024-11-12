@@ -2,9 +2,5 @@ requests
 beautifulsoup4
 html2text
 PySide6
-selenium
-urllib3
-tqdm
-undetected-chromedriver
-webdriver-manager
 pyppeteer
+qasync
