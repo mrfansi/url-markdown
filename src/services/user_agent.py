@@ -1,13 +1,18 @@
 import requests
 from .logger import LoggerService
 from ..interfaces.user_agent import UserAgentServiceInterface
+import os
+from dotenv import load_dotenv
 
 class UserAgentService(UserAgentServiceInterface):
     def __init__(self):
+
+        load_dotenv()
+        
         self.logger = LoggerService()
-        self.api_url = "https://api.apilayer.com/user_agent/generate"
+        self.api_url = os.getenv('USER_AGENT_API_URL', 'https://api.apilayer.com/user_agent/generate')
         self.headers = {
-            "apikey": "xXSpCjNt1jKQ4A79sV5sDCxzDPj1aDTu"
+            "apikey": os.getenv('USER_AGENT_API_KEY')
         }
         self.params = {
             "windows": "true",
