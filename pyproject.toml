@@ -1,0 +1,11 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "url-markdown"
+version = "1.0.0"
+requires-python = ">=3.12"
+
+[tool.pyinstaller]
+hooks-dir = "hooks"

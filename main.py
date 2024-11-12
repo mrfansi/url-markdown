@@ -25,24 +25,6 @@ def slugify(text):
     text = re.sub(r'\s+', '-', text).strip('-')  # Replace spaces with dashes
     return text
 
-def kill_port(port):
-    """
-    Kill any process using the specified port.
-    """
-    import subprocess
-    import platform
-
-    system = platform.system().lower()
-    if system == 'windows':
-        subprocess.run(["netstat", "-ano", "|", "findstr", f":{port}", "|", "findstr", "LISTENING", "|", "for", "/F", "\"tokens=5\"", "%i", "in", "('more')", "do", "taskkill", "/F", "/PID", "%i"], shell=True)
-    else:
-        # Use lsof to find and kill the process using the port
-        result = subprocess.run(["lsof", "-t", f"-i:{port}"], capture_output=True, text=True)
-        if result.stdout:
-            pids = result.stdout.strip().split()
-            for pid in pids:
-                subprocess.run(["kill", "-9", pid])
-
 async def url_to_markdown(url):
     try:
         browser = await launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox'])
