@@ -1,5 +1,4 @@
 from PySide6.QtWidgets import QWidget, QVBoxLayout, QTextEdit, QLabel
-from .markdown_highlighter import MarkdownHighlighter
 
 class MarkdownDisplayWidget(QWidget):
     """
@@ -11,7 +10,6 @@ class MarkdownDisplayWidget(QWidget):
     Attributes:
         title (str): The title of the current markdown content
         text_edit (QTextEdit): The main text display area
-        highlighter (MarkdownHighlighter): Syntax highlighter for markdown
     """
 
     def __init__(self) -> None:
@@ -37,9 +35,6 @@ class MarkdownDisplayWidget(QWidget):
                 line-height: 1.5;
             }
         """)
-        
-        # Initialize syntax highlighter
-        self.highlighter = MarkdownHighlighter(self.text_edit.document())
         
         layout.addWidget(markdown_label)
         layout.addWidget(self.text_edit)

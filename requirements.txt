@@ -4,3 +4,6 @@ html2text
 PySide6
 pyppeteer
 qasync
+selenium
+webdriver_manager
+undetected-chromedriver

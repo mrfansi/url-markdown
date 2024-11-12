@@ -1,12 +1,18 @@
-
 import html2text
 from bs4 import BeautifulSoup
 from ..interfaces.converter import IConverter
+import threading
 
 class HTMLConverter(IConverter):
     def __init__(self):
-        self.converter = html2text.HTML2Text()
-        self.converter.ignore_links = False
+        self._local = threading.local()
+    
+    @property
+    def converter(self):
+        if not hasattr(self._local, 'converter'):
+            self._local.converter = html2text.HTML2Text()
+            self._local.converter.ignore_links = False
+        return self._local.converter
         
     def convert_to_markdown(self, html_content: str) -> str:
         soup = BeautifulSoup(html_content, 'html.parser')
