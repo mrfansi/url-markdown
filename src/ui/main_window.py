@@ -1,6 +1,6 @@
 from typing import Optional
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QFileDialog,
+    QMainWindow, QWidget, QVBoxLayout, QSplitter, QFileDialog,
     QMessageBox, QApplication
 )
 from PySide6.QtCore import Qt
@@ -13,6 +13,7 @@ from .widgets.url_input import URLInputWidget
 from .widgets.markdown_display import MarkdownDisplayWidget
 from .widgets.action_buttons import ActionButtonsWidget
 from .widgets.logger_widget import LogWidget
+from .widgets.html_preview import HTMLPreviewWidget
 from ..services.logger import LoggerService
 
 
@@ -48,20 +49,33 @@ class MarkdownViewer(QMainWindow):
         content_layout.setContentsMargins(0, 0, 0, 0)
         content_layout.setSpacing(0)
         
+        # Create splitter for preview areas (changed to Horizontal)
+        preview_splitter = QSplitter(Qt.Orientation.Horizontal)
+        
         # Create widgets
         self.url_widget = URLInputWidget(self.convert_url)
         self.markdown_widget = MarkdownDisplayWidget()
+        self.html_preview = HTMLPreviewWidget()
         self.action_buttons = ActionButtonsWidget(
             self.copy_to_clipboard,
             self.save_markdown
         )
         self.log_widget = LogWidget()
         
+        # Add widgets to preview splitter with equal width
+        preview_splitter.addWidget(self.markdown_widget)
+        preview_splitter.addWidget(self.html_preview)
+        preview_splitter.setSizes([400, 400])  # Set equal initial widths
+        
         # Add widgets to content layout
         content_layout.addWidget(self.url_widget)
-        content_layout.addWidget(self.markdown_widget)
+        content_layout.addWidget(preview_splitter)
         content_layout.addWidget(self.action_buttons)
         content_layout.addWidget(self.log_widget)
+        
+        # Set splitter proportions (horizontal)
+        preview_splitter.setStretchFactor(0, 1)
+        preview_splitter.setStretchFactor(1, 1)
         
         layout.addWidget(content_widget)
         self.statusBar().showMessage("Ready")
@@ -84,6 +98,9 @@ class MarkdownViewer(QMainWindow):
         """Perform the actual conversion process."""
         self._update_status("Downloading page...")
         content, title = await self.scraper.fetch_content(url)
+        
+        # Update HTML preview first
+        self.html_preview.set_content(content)
         
         self._update_status("Converting to markdown...")
         markdown = self.converter.convert_to_markdown(content)

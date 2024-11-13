@@ -5,7 +5,7 @@ CONTENT_SELECTORS = {
         'article-content'
     ],
     'classes': [
-        'rm-Article',  # Add readme.com article class
+        'rm-Article',
         'content-body', 
         'article',
         'post-content'
@@ -14,14 +14,18 @@ CONTENT_SELECTORS = {
 
 CLEANING_SELECTORS = {
     'unwanted_tags': [
-        'script', 'style', 'iframe', 'button'
+        'script', 
+        'style', 
+        'iframe', 
+        'button', 
+        'header'
     ],
     'common_classes': [
-        'rdmd-code-copy',  # Remove copy code buttons
-        'CodeTabs-toolbar', # Remove code tab buttons
-        'heading-anchor-icon', # Remove anchor icons
-        'PageThumbs', # Remove feedback section
-        'UpdatedAt'  # Remove update timestamp
+        'rdmd-code-copy',
+        'CodeTabs-toolbar',
+        'heading-anchor-icon',
+        'PageThumbs',
+        'UpdatedAt'
     ],
     'common_ids': [
         'tutorialmodal-root'
