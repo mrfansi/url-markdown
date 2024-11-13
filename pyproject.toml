@@ -1,11 +1,36 @@
-[build-system]
-requires = ["setuptools>=42", "wheel"]
-build-backend = "setuptools.build_meta"
-
-[project]
+[tool.poetry]
 name = "url-markdown"
-version = "1.0.0"
-requires-python = ">=3.12"
+version = "0.1.0"
+description = "A tool to convert URLs to Markdown."
+authors = ["Muhammad Irfan <mrfansi@outlook.com>"]
+license = "MIT"
 
-[tool.pyinstaller]
-hooks-dir = "hooks"
+[tool.poetry.dependencies]
+python = "^3.12"
+requests = ">=2.31.0"
+beautifulsoup4 = ">=4.12.2"
+PySide6 = ">=6.5.3"
+PySide6-Addons = ">=6.5.3"
+PySide6-Essentials = ">=6.5.3"
+pyppeteer = ">=1.0.2"
+qasync = ">=0.24.0"
+selenium = ">=4.18.1"
+webdriver_manager = ">=4.0.1"
+undetected-chromedriver = ">=3.5.5"
+pyinstaller = ">=5.13.0"
+soupsieve = ">=2.5"
+markdownify = ">=0.11.6"
+fake-useragent = ">=1.4.0"
+cloudscraper = ">=1.2.71"
+requests-html = ">=0.10.0"
+playwright = ">=1.41.2"
+aiohttp = ">=3.9.3"
+lxml = { version = "~=5.1.0", extras = ["html_clean"] }
+lxml_html_clean = ">=0.3.1"
+anyio = ">=4.2.0"
+cachetools = ">=5.3.2"
+uvloop = { version = ">=0.19.0", markers = "sys_platform != 'win32'" }
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

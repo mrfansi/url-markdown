@@ -1,14 +1,16 @@
 import re
-from PySide6.QtWidgets import QApplication
 import sys
+import os
+import atexit
+import asyncio
 import anyio
+from PySide6.QtWidgets import QApplication
+from PySide6.QtCore import QTimer
+from contextlib import asynccontextmanager
 from src.services.web_scraper import WebScraper
 from src.services.html_converter import HTMLConverter
 from src.services.file_storage import FileStorage
 from src.ui.main_window import MarkdownViewer
-from contextlib import asynccontextmanager
-import atexit
-import os
 
 def slugify(text):
     """
@@ -30,22 +32,21 @@ async def setup_services():
         # Cleanup
         await scraper.close()
 
+async def run_app(app: QApplication):
+    async with setup_services() as (scraper, converter, storage):
+        viewer = MarkdownViewer(scraper, converter, storage)
+        viewer.show()
+        
+        while not viewer.isHidden():
+            app.processEvents()
+            await asyncio.sleep(0.01)
+
 def main():
     # Suppress OpenType support warnings
     os.environ["QT_LOGGING_RULES"] = "qt.fonts.warning=false"
     
     app = QApplication(sys.argv)
-    
-    async def run_app():
-        async with setup_services() as (scraper, converter, storage):
-            viewer = MarkdownViewer(scraper, converter, storage)
-            viewer.show()
-            
-            while not viewer.isHidden():
-                app.processEvents()
-                await anyio.sleep(0.01)
-
-    anyio.run(run_app)
+    anyio.run(lambda: run_app(app), backend="asyncio")
 
 @atexit.register
 def cleanup():
