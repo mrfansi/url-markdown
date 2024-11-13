@@ -105,8 +105,10 @@ class WebScraper(IScraper):
                 self.logger.debug(f"Cloudscraper headers: {dict(response.headers)}")
                 
                 if response.ok:
+                    # Decompress if necessary and decode
+                    content = self._decode_response_content(response)
                     self.logger.info("Cloudscraper request successful")
-                    return response.text, ""
+                    return content, ""
             except Exception as e:
                 self.logger.debug(f"Cloudscraper failed with error type: {type(e).__name__}")
                 self.logger.debug(f"Cloudscraper error details: {str(e)}")
@@ -119,9 +121,11 @@ class WebScraper(IScraper):
             self.logger.debug(f"Response encoding: {response.encoding}")
             
             response.raise_for_status()
-            content_length = len(response.text)
+            # Decompress if necessary and decode
+            content = self._decode_response_content(response)
+            content_length = len(content)
             self.logger.info(f"Request successful, content length: {content_length} characters")
-            return response.text, ""
+            return content, ""
         except Exception as e:
             self.logger.error(f"Request failed with error type: {type(e).__name__}")
             self.logger.error(f"Request error details: {str(e)}")
@@ -139,17 +143,22 @@ class WebScraper(IScraper):
             response = await self.html_session.get(url, headers=headers, timeout=30)
             self.logger.debug(f"Initial response status: {response.status_code}")
             
+            # Decompress if necessary and decode
+            content = self._decode_response_content(response)
+            response.html.raw_html = content.encode('utf-8', errors='replace')
+            
             # Render JavaScript
             self.logger.info("Rendering JavaScript...")
             await response.html.arender(timeout=30)
             
-            content = response.html.html
+            # After rendering, get the updated HTML content
+            rendered_content = response.html.html
             title = response.html.find('title', first=True)
             title_text = title.text if title else ""
             
             self.logger.info("requests-html fetch successful")
-            self.logger.debug(f"Content length: {len(content)} characters")
-            return content, title_text
+            self.logger.debug(f"Content length: {len(rendered_content)} characters")
+            return rendered_content, title_text
             
         except Exception as e:
             self.logger.error(f"requests-html fetch failed: {str(e)}")
@@ -228,6 +237,8 @@ class WebScraper(IScraper):
                     return "", ""
                 
                 content = await page.content()
+                # Ensure content is a string
+                content = str(content)
                 title = await page.title()
                 
                 self.logger.info(f"Page loaded successfully - Title: {title}")
@@ -238,6 +249,17 @@ class WebScraper(IScraper):
                 self.logger.error(f"Playwright error type: {type(e).__name__}")
                 self.logger.error(f"Playwright error details: {str(e)}")
                 return "", ""
+
+    def _decode_response_content(self, response):
+        """Decompress and decode response content if necessary."""
+        content = response.content
+        if response.headers.get('Content-Encoding') == 'gzip':
+            import gzip
+            content = gzip.decompress(content)
+        elif response.headers.get('Content-Encoding') == 'deflate':
+            import zlib
+            content = zlib.decompress(content, -zlib.MAX_WBITS)
+        return content.decode(response.apparent_encoding or 'utf-8', errors='replace')
 
     async def fetch_content(self, url: str) -> Tuple[str, str]:
         self.logger.info(f"Starting fetch for URL: {url}")
