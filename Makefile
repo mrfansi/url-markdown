@@ -24,11 +24,9 @@ install:
 
 build:
 	@if command -v $(POETRY) >/dev/null 2>&1; then \
-		$(POETRY) run python build.py && \
-		$(POETRY) run pyinstaller url-markdown.spec; \
+		$(POETRY) run python build.py --workers=$(PARALLEL); \
 	else \
-		python build.py && \
-		pyinstaller url-markdown.spec; \
+		python build.py --workers=$(PARALLEL); \
 	fi
 
 build-x86_64:
