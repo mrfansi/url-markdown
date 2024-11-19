@@ -20,6 +20,17 @@ class LogWidget(QWidget):
         # Add log text area
         self._log_text = QTextEdit()
         self._log_text.setReadOnly(True)
+        
+        # Set monospace font for better icon support
+        self._log_text.setStyleSheet("""
+            QTextEdit {
+                font-family: "SF Mono", Menlo, Monaco, "Courier New", monospace;
+                font-size: 12px;
+                line-height: 1.4;
+                padding: 8px;
+            }
+        """)
+        
         layout.addWidget(self._log_text)
 
     def _register_logger(self):
